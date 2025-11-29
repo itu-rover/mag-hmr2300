@@ -20,14 +20,14 @@ endif()
 # Set the project name
 set(CMAKE_PROJECT_NAME hmr2300)
 
+include(cmake/gcc-arm-none-eabi.cmake)
+
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
-
-include(cmake/gcc-arm-none-eabi.cmake)
 
 # Enable CMake support for ASM and C languages
 enable_language(C ASM)

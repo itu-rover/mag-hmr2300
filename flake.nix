@@ -17,12 +17,14 @@
     {
       devShells = forEachSupportedSystem ({ pkgs }: let
         deps = with pkgs; [
-          stm32cubemx
           cmake
           ninja
           gcc-arm-embedded
           openocd
           gdb
+          git
+        ] ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+          stm32cubemx
           stlink
         ];
       in {
