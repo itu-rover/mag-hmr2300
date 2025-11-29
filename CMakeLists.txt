@@ -67,3 +67,9 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
     # Add user defined libraries
 )
+
+# Build binary
+add_custom_target(binary ALL ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.bin
+    DEPENDS ${CMAKE_PROJECT_NAME}
+    COMMENT "Building binary: ${CMAKE_PROJECT_NAME}.bin"
+)
