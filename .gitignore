@@ -2,6 +2,7 @@
 mx.scratch
 .DS_Store
 !.settings
+.direnv
 
 # IDE and extension stuff
 /.vscode/
