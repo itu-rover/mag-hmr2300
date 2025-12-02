@@ -6,3 +6,7 @@ mx.scratch
 
 # IDE and extension stuff
 /.vscode/
+
+# Nix output directories
+/result
+/result-*

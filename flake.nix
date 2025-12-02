@@ -35,5 +35,25 @@
           };
         };
       });
+
+      packages = forEachSupportedSystem ({ pkgs }: with pkgs; {
+        default = stdenv.mkDerivation {
+          pname = "mag-hmr2300";
+          version = "latest";
+
+          src = lib.cleanSource ./.;
+
+          nativeBuildInputs = [
+            cmake
+            ninja
+          ];
+
+          buildInputs = [
+            gcc-arm-embedded
+          ];
+
+          cmakeBuildType = "Release";
+        };
+      });
     };
 }
