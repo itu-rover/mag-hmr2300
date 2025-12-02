@@ -37,21 +37,35 @@
       });
 
       packages = forEachSupportedSystem ({ pkgs }: with pkgs; {
-        default = stdenv.mkDerivation {
-          pname = "mag-hmr2300";
+        library = stdenv.mkDerivation {
+          pname = "hmr2300";
           version = "latest";
 
           src = lib.cleanSource ./.;
 
           nativeBuildInputs = [
             cmake
-            ninja
+          ];
+
+          cmakeBuildType = "Release";
+        };
+        stm32 = stdenv.mkDerivation {
+          pname = "mag-hmr2300-stm32";
+          version = "latest";
+
+          src = lib.cleanSource ./.;
+
+          nativeBuildInputs = [
+            cmake
           ];
 
           buildInputs = [
             gcc-arm-embedded
           ];
 
+          cmakeFlags = [
+            "-DTARGET_STM32=true"
+          ];
           cmakeBuildType = "Release";
         };
       });
