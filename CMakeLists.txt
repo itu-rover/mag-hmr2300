@@ -69,7 +69,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 )
 
 # Build binary
-add_custom_target(binary ALL ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.bin
+add_custom_command(OUTPUT ${CMAKE_PROJECT_NAME}.bin
     DEPENDS ${CMAKE_PROJECT_NAME}
+    COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.bin
     COMMENT "Building binary: ${CMAKE_PROJECT_NAME}.bin"
+    VERBATIM
 )
+add_custom_target(binary ALL DEPENDS ${CMAKE_PROJECT_NAME}.bin)
+
+install(TARGETS ${CMAKE_PROJECT_NAME})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.bin TYPE BIN)
