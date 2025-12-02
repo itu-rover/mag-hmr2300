@@ -13,4 +13,4 @@ jobs:
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - name: Build ${{ matrix.builds }}
-      run: nix build .#${{ matrix.builds }}
+      run: nix build .#${{ matrix.builds }} --print-build-logs
