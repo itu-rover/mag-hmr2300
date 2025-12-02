@@ -18,10 +18,13 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
-project(hmr2300)
+project(hmr2300-test)
 
 # Enable CMake support for ASM and C languages
 enable_language(C ASM)
+
+# Include portable library
+add_subdirectory(lib)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
@@ -55,8 +58,7 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
-    # Add user defined libraries
+    hmr2300
 )
 
 # Build binary
