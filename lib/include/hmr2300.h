@@ -1,7 +1,7 @@
 #ifndef _HMR2300_H
 #define _HMR2300_H
 
-#include <hmr2300/handle.h>
+#include <hmr2300/state.h>
 #include <hmr2300/status.h>
 
 #ifdef __cplusplus

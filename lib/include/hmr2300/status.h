@@ -9,7 +9,6 @@ typedef enum hmr2300_status {
     HMR2300_OK = 0,
     HMR2300_BUSY,
     HMR2300_ERROR,
-    HMR2300_TIMEOUT,
 } hmr2300_status_t;
 
 #ifdef __cplusplus

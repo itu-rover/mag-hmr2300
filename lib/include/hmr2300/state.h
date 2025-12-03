@@ -7,9 +7,10 @@
 extern "C" {
 #endif
 
-typedef struct hmr2300 {
+typedef struct hmr2300_state {
     char serial[16];
     bool initialized;
+    bool busy;
 } hmr2300_t;
 
 #define HMR2300_NEW { .initialized = false }

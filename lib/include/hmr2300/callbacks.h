@@ -2,14 +2,19 @@
 #define _HMR2300_CALLBACKS_H
 
 #include <stdint.h>
+
+#include <hmr2300/state.h>
 #include <hmr2300/status.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-hmr2300_status_t hmr2300_write(hmr2300_t* dev, const char* data, uint16_t size);
-hmr2300_status_t hmr2300_read(hmr2300_t* dev, const char* data, uint16_t size);
+hmr2300_status_t hmr2300_read(hmr2300_t* dev, char* data, size_t size);
+hmr2300_status_t hmr2300_write(hmr2300_t* dev, const char* data, size_t size);
+
+void hmr2300_read_complete(hmr2300_t* dev);
+void hmr2300_write_complete(hmr2300_t* dev);
 
 void hmr2300_log(const char* message);
 
