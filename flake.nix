@@ -64,7 +64,7 @@
           ];
 
           cmakeFlags = [
-            "-DTARGET_STM32=true"
+            "-DTARGET_STM32=ON"
           ];
           cmakeBuildType = "Release";
         };

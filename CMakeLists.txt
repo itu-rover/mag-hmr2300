@@ -12,6 +12,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+option(TARGET_STM32 "Build for STM32 target" OFF)
+
 if(NOT CMAKE_TOOLCHAIN_FILE AND TARGET_STM32)
     include(cmake/gcc-arm-none-eabi.cmake)
 endif()
@@ -22,7 +24,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 # Core project settings
 project(hmr2300-test)
 
-# Include portable library
+# Include subprojects
 add_subdirectory(lib)
 
 if(TARGET_STM32)
