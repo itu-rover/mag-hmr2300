@@ -36,7 +36,7 @@
         };
       });
 
-      packages = forEachSupportedSystem ({ pkgs }: with pkgs; {
+      packages = forEachSupportedSystem ({ pkgs }: with pkgs; rec {
         library = stdenv.mkDerivation {
           pname = "hmr2300";
           version = "latest";
@@ -49,8 +49,24 @@
 
           cmakeBuildType = "Release";
         };
+        hmrtool = stdenv.mkDerivation {
+          pname = "hmrtool";
+          version = "latest";
+
+          src = lib.cleanSource ./hmrtool;
+
+          nativeBuildInputs = [
+            cmake
+          ];
+
+          buildInputs = [
+            library
+          ];
+
+          cmakeBuildType = "Release";
+        };
         stm32 = stdenv.mkDerivation {
-          pname = "mag-hmr2300-stm32";
+          pname = "hmr2300-stm32";
           version = "latest";
 
           src = lib.cleanSource ./.;
