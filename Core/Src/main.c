@@ -27,7 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <hmr.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -120,8 +120,10 @@ int main(void)
   MX_USART2_UART_Init();
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
-  sendDataFromMCU();
-  recieveDataFromHMR();   
+  hmr2300_init(&hmr);
+
+  // sendDataFromMCU();
+  // recieveDataFromHMR();
   /* USER CODE END 2 */
 
   /* Infinite loop */
