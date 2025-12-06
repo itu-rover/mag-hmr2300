@@ -1,0 +1,6 @@
+#ifndef _HMR2300_CONFIG_H
+#define _HMR2300_CONFIG_H
+
+#cmakedefine _HMR2300_EMBEDDED
+
+#endif /* _HMR2300_CONFIG_H */

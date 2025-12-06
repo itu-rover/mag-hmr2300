@@ -4,6 +4,7 @@
 
 #include <hmr2300.h>
 #include <hmr2300/callbacks.h>
+#include <hmr2300/config.h>
 
 /* Maybe only for debug builds? */
 #define CHECK_INITIALIZED_OR_RETURN(dev, ret)     \
@@ -35,7 +36,11 @@ hmr2300_status_t write(hmr2300_t* dev, const char* data, size_t size) {
 
 void poll(hmr2300_t* dev) {
     while (dev->busy) {
-        // FIXME
+#if (defined(__arm__) || defined(__aarch64__)) && defined(_HMR2300_EMBEDDED)
+        __asm__ volatile("wfi");
+#else
+        // busy loop
+#endif
     }
 }
 

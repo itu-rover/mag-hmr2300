@@ -13,6 +13,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(TARGET_STM32 "Build for STM32 target" OFF)
+option(TARGET_EMBEDDED "Target is embedded" OFF)
+
+if (TARGET_STM32)
+    set(TARGET_EMBEDDED ON)
+endif()
+
+if (TARGET_EMBEDDED)
+    set(_HMR2300_EMBEDDED ON)
+endif()
 
 if(NOT CMAKE_TOOLCHAIN_FILE AND TARGET_STM32)
     include(cmake/gcc-arm-none-eabi.cmake)

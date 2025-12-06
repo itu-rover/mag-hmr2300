@@ -7,9 +7,12 @@ set_property(TARGET hmr2300 PROPERTY SOVERSION 0)
 set_property(TARGET hmr2300 PROPERTY INTERFACE_hmr2300_MAJOR_VERSION 0)
 set_property(TARGET hmr2300 APPEND PROPERTY COMPATIBLE_INTERFACE_STRING hmr2300_MAJOR_VERSION)
 
+configure_file(hmr2300_config.h.in hmr2300/config.h @ONLY)
+
 target_include_directories(hmr2300 PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
+target_include_directories(hmr2300 PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 target_sources(hmr2300 PRIVATE
     src/hmr2300.cpp
