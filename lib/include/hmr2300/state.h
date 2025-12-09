@@ -13,7 +13,7 @@ typedef struct hmr2300_state {
     bool busy;
 } hmr2300_t;
 
-#define HMR2300_NEW { .initialized = false }
+#define HMR2300_NEW { .serial = {0}, .initialized = false, .busy = false }
 
 #ifdef __cplusplus
 }

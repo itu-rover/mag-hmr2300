@@ -20,7 +20,7 @@ hmr2300_status_t hmr2300_write(hmr2300_t* dev, const char* data, size_t size) {
 }
 
 int main(char** argv, int argc) {
-    if (hmr2300_init(&hmr) != HMR2300_OK) {
+    if (hmr2300_init(&hmr, 50) != HMR2300_OK) {
         printf("Failed to initialize HMR2300 device\n");
         return -1;
     }

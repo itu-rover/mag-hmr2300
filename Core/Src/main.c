@@ -120,7 +120,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
-  hmr2300_init(&hmr);
+  hmr2300_init(&hmr, 50);
 
   // sendDataFromMCU();
   // recieveDataFromHMR();

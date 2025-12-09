@@ -60,25 +60,25 @@ hmr2300_status_t write_poll(hmr2300_t* dev, const char* data, size_t size) {
     return HMR2300_OK;
 }
 
-hmr2300_status_t hmr2300_init(hmr2300_t* dev) {
+hmr2300_status_t hmr2300_init(hmr2300_t* dev, uint8_t sample_rate) {
     if (dev == NULL || dev->initialized) {
         return HMR2300_ERROR;
     }
 
     hmr2300_log("Initializing HMR2300 device");
     if (auto status = write_poll(dev, "*99#\r", 5); status != HMR2300_OK) {
-        hmr2300_log("Failed to write initialization command to HMR2300 device");
+        hmr2300_log("Failed to write initialization command");
         return status;
     }
 
     char response[22];
     if (auto status = read_poll(dev, response, 22); status != HMR2300_OK) {
-        hmr2300_log("Failed to read serial number from HMR2300 device");
+        hmr2300_log("Failed to read serial number");
         return status;
     }
 
     if (memcmp(response, "SER# ", 5)) {
-        hmr2300_log("Invalid response received from HMR2300 device");
+        hmr2300_log("Invalid response received");
         return HMR2300_ERROR;
     }
 
@@ -87,6 +87,43 @@ hmr2300_status_t hmr2300_init(hmr2300_t* dev) {
     char log_msg[64];
     snprintf(log_msg, sizeof(log_msg), "HMR2300 serial number: %s", dev->serial);
     hmr2300_log(log_msg);
+
+    char rate_cmd[16];
+    snprintf(rate_cmd, sizeof(rate_cmd), "*99WE *99R)%u\r", sample_rate);
+    if (auto status = write_poll(dev, rate_cmd, strlen(rate_cmd)); status != HMR2300_OK) {
+        hmr2300_log("Failed to write sample rate command");
+        return status;
+    }
+
+    char response2[3];
+    if (auto status = read_poll(dev, response2, 3); status != HMR2300_OK) {
+        hmr2300_log("Failed to read response");
+        return status;
+    }
+
+    if (memcmp(response2, "OK\r", 3)) {
+        hmr2300_log("error on sample rate command");
+        return HMR2300_ERROR;
+    }
+
+    snprintf(log_msg, sizeof(log_msg), "HMR2300 sample rate: %u Hz", sample_rate);
+    hmr2300_log(log_msg);
+
+    if (auto status = write_poll(dev, "*99WE *99B\r", 11); status != HMR2300_OK) {
+        hmr2300_log("Failed to enable binary mode");
+        return status;
+    }
+
+    char response3[10];
+    if (auto status = read_poll(dev, response3, 10); status != HMR2300_OK) {
+        hmr2300_log("Failed to read response for binary mode command");
+        return status;
+    }
+
+    if (memcmp(response3, "BINARY ON\r", 10)) {
+        hmr2300_log("error on binary mode command");
+        return HMR2300_ERROR;
+    }
 
     dev->initialized = true;
     return HMR2300_OK;
