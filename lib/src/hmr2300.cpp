@@ -129,6 +129,33 @@ hmr2300_status_t hmr2300_init(hmr2300_t* dev, uint8_t sample_rate) {
     return HMR2300_OK;
 }
 
+hmr2300_status_t hmr2300_sample_oneshot(hmr2300_t* dev, hmr2300_sample_t* sample) {
+    CHECK_INITIALIZED(dev);
+
+    if (auto status = write_poll(dev, "*99P\r", 5); status != HMR2300_OK) {
+        hmr2300_log("Failed to write sample command");
+        return status;
+    }
+
+    uint8_t response[7];
+    if (auto status = read_poll(dev, reinterpret_cast<char*>(response), 7); status != HMR2300_OK) {
+        hmr2300_log("Failed to read sample data");
+        return status;
+    }
+
+    if (response[6] != '\r') {
+        hmr2300_log("Invalid sample data received");
+        return HMR2300_ERROR;
+    }
+
+    sample->id = HMR2300_SAMPLE_ONESHOT;
+    sample->x = (response[0] << 8) | response[1];
+    sample->y = (response[2] << 8) | response[3];
+    sample->z = (response[4] << 8) | response[5];
+
+    return HMR2300_OK;
+}
+
 void hmr2300_read_complete(hmr2300_t* dev) {
     CHECK_INITIALIZED_VOID(dev);
     dev->busy = false;
