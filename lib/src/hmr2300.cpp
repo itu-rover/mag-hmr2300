@@ -14,10 +14,11 @@
     } while (0)
 
 #define CHECK_INITIALIZED(dev) CHECK_INITIALIZED_OR_RETURN(dev, HMR2300_ERROR)
-#define CHECK_INITIALIZED_VOID(dev) CHECK_INITIALIZED_OR_RETURN(dev, )
 
 hmr2300_status_t read(hmr2300_t* dev, char* data, size_t size) {
     dev->busy = true;
+    dev->in_progress_read_size = size;
+    dev->in_progress_read_buffer = data;
     auto status = hmr2300_read(dev, data, size);
     if (status == HMR2300_ERROR)
         dev->busy = false;
@@ -40,21 +41,22 @@ void poll(hmr2300_t* dev) {
         __asm__ volatile("wfi");
 #else
         // busy loop
+        __asm__ volatile("nop"); // prevent getting optimized out
 #endif
     }
 }
 
 hmr2300_status_t read_poll(hmr2300_t* dev, char* data, size_t size) {
-    if (auto status = read(dev, data, size); status != HMR2300_OK)
-        return status;
+    if (auto status = read(dev, data, size); status == HMR2300_ERROR)
+        return HMR2300_ERROR;
 
     poll(dev);
     return HMR2300_OK;
 }
 
 hmr2300_status_t write_poll(hmr2300_t* dev, const char* data, size_t size) {
-    if (auto status = write(dev, data, size); status != HMR2300_OK)
-        return status;
+    if (auto status = write(dev, data, size); status == HMR2300_ERROR)
+        return HMR2300_ERROR;
 
     poll(dev);
     return HMR2300_OK;
@@ -66,13 +68,13 @@ hmr2300_status_t hmr2300_init(hmr2300_t* dev, uint8_t sample_rate) {
     }
 
     hmr2300_log("Initializing HMR2300 device");
-    if (auto status = write_poll(dev, "*99#\r", 5); status != HMR2300_OK) {
+    if (auto status = write_poll(dev, "*99#\r", 5); status == HMR2300_ERROR) {
         hmr2300_log("Failed to write initialization command");
         return status;
     }
 
     char response[22];
-    if (auto status = read_poll(dev, response, 22); status != HMR2300_OK) {
+    if (auto status = read_poll(dev, response, 22); status == HMR2300_ERROR) {
         hmr2300_log("Failed to read serial number");
         return status;
     }
@@ -88,15 +90,31 @@ hmr2300_status_t hmr2300_init(hmr2300_t* dev, uint8_t sample_rate) {
     snprintf(log_msg, sizeof(log_msg), "HMR2300 serial number: %s", dev->serial);
     hmr2300_log(log_msg);
 
-    char rate_cmd[16];
-    snprintf(rate_cmd, sizeof(rate_cmd), "*99WE *99R)%u\r", sample_rate);
-    if (auto status = write_poll(dev, rate_cmd, strlen(rate_cmd)); status != HMR2300_OK) {
+    if (auto status = write_poll(dev, "*99WE\r", 6); status == HMR2300_ERROR) {
+        hmr2300_log("Failed to write write enable");
+        return status;
+    }
+
+    char response1[3];
+    if (auto status = read_poll(dev, response1, 3); status == HMR2300_ERROR) {
+        hmr2300_log("Failed to read response");
+        return status;
+    }
+
+    if (memcmp(response1, "OK\r", 3)) {
+        hmr2300_log("error on write enable");
+        return HMR2300_ERROR;
+    }
+
+    char rate_cmd[10];
+    snprintf(rate_cmd, sizeof(rate_cmd), "*99R=%u\r", sample_rate);
+    if (auto status = write_poll(dev, rate_cmd, strlen(rate_cmd)); status == HMR2300_ERROR) {
         hmr2300_log("Failed to write sample rate command");
         return status;
     }
 
     char response2[3];
-    if (auto status = read_poll(dev, response2, 3); status != HMR2300_OK) {
+    if (auto status = read_poll(dev, response2, 3); status == HMR2300_ERROR) {
         hmr2300_log("Failed to read response");
         return status;
     }
@@ -109,13 +127,13 @@ hmr2300_status_t hmr2300_init(hmr2300_t* dev, uint8_t sample_rate) {
     snprintf(log_msg, sizeof(log_msg), "HMR2300 sample rate: %u Hz", sample_rate);
     hmr2300_log(log_msg);
 
-    if (auto status = write_poll(dev, "*99WE *99B\r", 11); status != HMR2300_OK) {
+    if (auto status = write_poll(dev, "*99B\r", 5); status == HMR2300_ERROR) {
         hmr2300_log("Failed to enable binary mode");
         return status;
     }
 
     char response3[10];
-    if (auto status = read_poll(dev, response3, 10); status != HMR2300_OK) {
+    if (auto status = read_poll(dev, response3, 10); status == HMR2300_ERROR) {
         hmr2300_log("Failed to read response for binary mode command");
         return status;
     }
@@ -132,13 +150,13 @@ hmr2300_status_t hmr2300_init(hmr2300_t* dev, uint8_t sample_rate) {
 hmr2300_status_t hmr2300_sample_oneshot(hmr2300_t* dev, hmr2300_sample_t* sample) {
     CHECK_INITIALIZED(dev);
 
-    if (auto status = write_poll(dev, "*99P\r", 5); status != HMR2300_OK) {
+    if (auto status = write_poll(dev, "*99P\r", 5); status == HMR2300_ERROR) {
         hmr2300_log("Failed to write sample command");
         return status;
     }
 
     uint8_t response[7];
-    if (auto status = read_poll(dev, reinterpret_cast<char*>(response), 7); status != HMR2300_OK) {
+    if (auto status = read_poll(dev, reinterpret_cast<char*>(response), 7); status == HMR2300_ERROR) {
         hmr2300_log("Failed to read sample data");
         return status;
     }
@@ -148,20 +166,24 @@ hmr2300_status_t hmr2300_sample_oneshot(hmr2300_t* dev, hmr2300_sample_t* sample
         return HMR2300_ERROR;
     }
 
+    int16_t x_sign = (response[0] & 0x80) ? -1 : 1;
+    int16_t y_sign = (response[2] & 0x80) ? -1 : 1;
+    int16_t z_sign = (response[4] & 0x80) ? -1 : 1;
+
     sample->id = HMR2300_SAMPLE_ONESHOT;
-    sample->x = (response[0] << 8) | response[1];
-    sample->y = (response[2] << 8) | response[3];
-    sample->z = (response[4] << 8) | response[5];
+    sample->x = x_sign * static_cast<int16_t>(((response[0] << 8) | response[1]) & 0x7FFF);
+    sample->y = y_sign * static_cast<int16_t>(((response[2] << 8) | response[3]) & 0x7FFF);
+    sample->z = z_sign * static_cast<int16_t>(((response[4] << 8) | response[5]) & 0x7FFF);
 
     return HMR2300_OK;
 }
 
 void hmr2300_read_complete(hmr2300_t* dev) {
-    CHECK_INITIALIZED_VOID(dev);
     dev->busy = false;
+    dev->in_progress_read_size = 0;
+    dev->in_progress_read_buffer = NULL;
 }
 
 void hmr2300_write_complete(hmr2300_t* dev) {
-    CHECK_INITIALIZED_VOID(dev);
     dev->busy = false;
 }

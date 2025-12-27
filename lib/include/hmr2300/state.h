@@ -9,11 +9,15 @@ extern "C" {
 
 typedef struct hmr2300_state {
     char serial[16];
+    size_t in_progress_read_size;
+    char* in_progress_read_buffer;
     bool initialized;
     bool busy;
 } hmr2300_t;
 
-#define HMR2300_NEW { .serial = {0}, .initialized = false, .busy = false }
+#define HMR2300_NEW { .serial = {0}, .in_progress_read_size = 0, \
+                      .in_progress_read_buffer = NULL, .initialized = false, \
+                      .busy = false }
 
 #ifdef __cplusplus
 }
