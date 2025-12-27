@@ -18,12 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32f3xx_hal.h"
-#include "stm32f3xx_hal_def.h"
-#include "stm32f3xx_hal_gpio.h"
-#include "stm32f3xx_hal_uart.h"
-#include <stdint.h>
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -50,29 +44,8 @@ UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-char TxBuffer[5];
-uint8_t RxBuffer[28*4] = "AAAA";
-int indx = 0;
+
 /* USER CODE END PV */
-
-/* USER CODE BEGIN PF */
-void sendDataFromMCU(){
-  sprintf(TxBuffer, "*99P"); 
-  TxBuffer[4] = '\r';
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, 1);
-  if (HAL_UART_Transmit(&huart4, TxBuffer, sizeof(TxBuffer), 10) != HAL_OK){
-    Error_Handler();
-  }
-}
-
-void recieveDataFromHMR(){
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_12, 0);
-  if (HAL_UART_Receive(&huart4, RxBuffer, sizeof(RxBuffer), 1000) != HAL_OK) {
-    Error_Handler();
-  }
-  HAL_UART_Transmit(&huart2, RxBuffer, sizeof(RxBuffer), 100);
-}
-/* USER CODE END PF */ 
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -121,9 +94,6 @@ int main(void)
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
   hmr2300_init(&hmr, 50);
-
-  // sendDataFromMCU();
-  // recieveDataFromHMR();
   /* USER CODE END 2 */
 
   /* Infinite loop */
