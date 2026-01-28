@@ -21,6 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
+
 #include <hmr.h>
 /* USER CODE END Includes */
 
@@ -93,6 +96,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
+  HAL_Delay(4000);
   hmr2300_init(&hmr, 50);
   /* USER CODE END 2 */
 
@@ -100,6 +104,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    hmr2300_sample_t sample;
+    if (hmr2300_sample_oneshot(&hmr, &sample) == HMR2300_OK) {
+      char buffer[256];
+      snprintf(buffer, sizeof(buffer), "%6hd %6hd %6hd\n", sample.x, sample.y, sample.z);
+      HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), 1000);
+    } else {
+      hmr2300_log("Failed to get sample");
+    }
+    HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -166,14 +166,10 @@ hmr2300_status_t hmr2300_sample_oneshot(hmr2300_t* dev, hmr2300_sample_t* sample
         return HMR2300_ERROR;
     }
 
-    int16_t x_sign = (response[0] & 0x80) ? -1 : 1;
-    int16_t y_sign = (response[2] & 0x80) ? -1 : 1;
-    int16_t z_sign = (response[4] & 0x80) ? -1 : 1;
-
     sample->id = HMR2300_SAMPLE_ONESHOT;
-    sample->x = x_sign * static_cast<int16_t>(((response[0] << 8) | response[1]) & 0x7FFF);
-    sample->y = y_sign * static_cast<int16_t>(((response[2] << 8) | response[3]) & 0x7FFF);
-    sample->z = z_sign * static_cast<int16_t>(((response[4] << 8) | response[5]) & 0x7FFF);
+    sample->x = static_cast<int16_t>((response[0] << 8) | response[1]);
+    sample->y = static_cast<int16_t>((response[2] << 8) | response[3]);
+    sample->z = static_cast<int16_t>((response[4] << 8) | response[5]);
 
     return HMR2300_OK;
 }

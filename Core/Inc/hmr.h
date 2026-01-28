@@ -5,4 +5,6 @@
 
 extern hmr2300_t hmr;
 
+void hmr2300_log(const char* message);
+
 #endif /* _HMR_H */

@@ -7,6 +7,7 @@
 
 #include <thread>
 #include <chrono>
+#include <ctime>
 
 #include <hmr2300.h>
 #include <hmr2300/callbacks.h>
@@ -209,11 +210,18 @@ int main(int argc, char** argv) {
     while (1) {
         hmr2300_sample_t sample;
         if (hmr2300_sample_oneshot(&hmr, &sample) == HMR2300_OK) {
-            printf("%6hd %6hd %6hd\n", sample.id, sample.x, sample.y, sample.z);
+            auto now = std::chrono::system_clock::now();
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+            std::time_t t = std::chrono::system_clock::to_time_t(now);
+            std::tm tm;
+            localtime_r(&t, &tm);
+            char buf[64];
+            std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+            printf("%s.%03d %6hd %6hd %6hd\n", buf, (int)ms.count(), sample.x, sample.y, sample.z);
         } else {
             printf("Failed to get sample\n");
         }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
     return 0;
