@@ -12,12 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-option(TARGET_STM32 "Build for STM32 target" OFF)
 option(TARGET_EMBEDDED "Target is embedded" OFF)
-
-if (TARGET_STM32)
-    set(TARGET_EMBEDDED ON)
-endif()
 
 if (TARGET_EMBEDDED)
     set(_HMR2300_EMBEDDED ON)
@@ -35,55 +30,3 @@ project(hmr2300-test)
 
 # Include subprojects
 add_subdirectory(lib)
-
-if(TARGET_STM32)
-    # Enable CMake support for ASM and C languages
-    enable_language(C ASM)
-
-    # Create an executable object type
-    add_executable(${CMAKE_PROJECT_NAME})
-
-    # Add STM32CubeMX generated sources
-    add_subdirectory(cmake/stm32cubemx)
-
-    # Link directories setup
-    target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        # Add user defined library search paths
-    )
-
-    # Add sources to executable
-    target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-        Core/Src/hmr.c
-    )
-
-    # Add include paths
-    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        # Add user defined include paths
-    )
-
-    # Add project symbols (macros)
-    target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-        # Add user defined symbols
-    )
-
-    # Remove wrong libob.a library dependency when using cpp files
-    list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
-
-    # Add linked libraries
-    target_link_libraries(${CMAKE_PROJECT_NAME}
-        stm32cubemx
-        hmr2300
-    )
-
-    # Build binary
-    add_custom_command(OUTPUT ${CMAKE_PROJECT_NAME}.bin
-        DEPENDS ${CMAKE_PROJECT_NAME}
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.bin
-        COMMENT "Building binary: ${CMAKE_PROJECT_NAME}.bin"
-        VERBATIM
-    )
-    add_custom_target(binary ALL DEPENDS ${CMAKE_PROJECT_NAME}.bin)
-
-    install(TARGETS ${CMAKE_PROJECT_NAME})
-    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.bin TYPE BIN)
-endif()

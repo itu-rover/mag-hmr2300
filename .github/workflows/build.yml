@@ -5,12 +5,10 @@ jobs:
   build:
     strategy:
       matrix:
-        builds: [library, stm32, hmrtool]
+        builds: [library, hmrtool]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
     - uses: cachix/install-nix-action@v31
-      with:
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
     - name: Build ${{ matrix.builds }}
       run: nix build .#${{ matrix.builds }} --print-build-logs
